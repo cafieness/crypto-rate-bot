@@ -1,4 +1,6 @@
 .env
 localhost.session.sql
-.vscode
+.vscode/settings.json
 localhost.sql
+go.mod.backup
+go.sum.backup

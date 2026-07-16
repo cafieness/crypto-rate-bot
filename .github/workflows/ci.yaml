@@ -31,11 +31,15 @@ jobs:
         run: go mod download
 
 
-      - name: Run tests
+      - name: Tests
         run: go test ./...
 
 
-      - name: Run linter
+      - name: Build
+        run: go build ./...
+
+
+      - name: Lint
         uses: golangci/golangci-lint-action@v7
         with:
           version: latest

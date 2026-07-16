@@ -135,7 +135,7 @@ func newHTTPServer(rateService *service.RateService) *http.Server {
 
 	server := &http.Server{
 		Addr:    ":8081",
-		Handler: router,
+		Handler: transporthttp.CORSMiddleware(router),
 	}
 	go func() {
 		slog.Info("Server started at :8081")

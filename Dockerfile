@@ -11,14 +11,10 @@ COPY . .
 RUN go build -o cryptobot ./cmd/app
 
 
-FROM alpine:latest
+FROM debian:bookworm-slim
 
 WORKDIR /app
 
 COPY --from=builder /app/cryptobot .
-
-COPY .env.example .env
-
-EXPOSE 8081
 
 CMD ["./cryptobot"]

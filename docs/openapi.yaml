@@ -1,0 +1,71 @@
+openapi: 3.0.3
+
+info:
+  title: Crypto Rate API
+  description: API for getting cryptocurrency rates
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8081
+
+paths:
+
+  /rates:
+    get:
+      summary: Get all crypto rates
+      description: Returns current rates for supported currencies
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rate"
+
+        "500":
+          description: Internal server error
+
+
+  /rates/{currency}:
+    get:
+      summary: Get rate by currency
+      description: Returns latest rate for selected cryptocurrency
+
+      parameters:
+        - name: currency
+          in: path
+          required: true
+          schema:
+            type: string
+            example: bitcoin
+
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Rate"
+
+        "404":
+          description: Currency not found
+
+
+components:
+
+  schemas:
+
+    Rate:
+      type: object
+
+      properties:
+        currency:
+          type: string
+          example: bitcoin
+
+        price:
+          type: number
+          format: double
+          example: 64000
