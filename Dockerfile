@@ -17,4 +17,6 @@ WORKDIR /app
 
 COPY --from=builder /app/cryptobot .
 
+EXPOSE 8081
+
 CMD ["./cryptobot"]
