@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"cryptobot/internal/domain"
 	"database/sql"
 )
@@ -16,10 +17,12 @@ func NewSubscriptionRepository(db *sql.DB) *SubscriptionRepository {
 }
 
 func (s *SubscriptionRepository) Create(
+	ctx context.Context,
 	sub domain.Subscription,
 ) error {
 
-	_, err := s.db.Exec(
+	_, err := s.db.ExecContext(
+		ctx,
 		`
 		insert into subscriptions(
 			chat_id,
@@ -41,9 +44,11 @@ func (s *SubscriptionRepository) Create(
 
 }
 func (s *SubscriptionRepository) Deactivate(
+	ctx context.Context,
 	chatID int64,
 ) error {
-	_, err := s.db.Exec(
+	_, err := s.db.ExecContext(
+		ctx,
 		`
 		update subscriptions
 		set is_active = false
@@ -53,10 +58,11 @@ func (s *SubscriptionRepository) Deactivate(
 	)
 	return err
 }
-func (s *SubscriptionRepository) GetActive() (
+func (s *SubscriptionRepository) GetActive(ctx context.Context) (
 	[]domain.Subscription,
 	error) {
-	rows, err := s.db.Query(
+	rows, err := s.db.QueryContext(
+		ctx,
 		`
 		select chat_id, interval_minutes, currency, is_active, last_sent_at
 		from subscriptions
@@ -99,11 +105,13 @@ func (s *SubscriptionRepository) GetActive() (
 }
 
 func (s *SubscriptionRepository) UpdateLastSent(
+	ctx context.Context,
 	chatID int64,
 	currency string,
 ) error {
 
-	_, err := s.db.Exec(
+	_, err := s.db.ExecContext(
+		ctx,
 		`
 		update subscriptions
 		set last_sent_at = now()
@@ -118,13 +126,16 @@ func (s *SubscriptionRepository) UpdateLastSent(
 }
 
 func (s *SubscriptionRepository) Exists(
+
+	ctx context.Context,
 	chatID int64,
 	currency string,
 ) (bool, error) {
 
 	var exists bool
 
-	err := s.db.QueryRow(
+	err := s.db.QueryRowContext(
+		ctx,
 		`
 		SELECT EXISTS(
 			SELECT 1

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"cryptobot/internal/domain"
 )
 
@@ -16,19 +17,19 @@ func NewRateService(
 	}
 }
 
-func (s *RateService) GetLatest(currency string) (domain.Rate, error) {
-	return s.repo.GetLatest(currency)
+func (s *RateService) GetLatest(ctx context.Context, currency string) (domain.Rate, error) {
+	return s.repo.GetLatest(ctx, currency)
 
 }
 
-func (s *RateService) GetDailyMinMax(currency string) (float64, float64, error) {
-	return s.repo.GetDailyMinMax(currency)
+func (s *RateService) GetDailyMinMax(ctx context.Context, currency string) (float64, float64, error) {
+	return s.repo.GetDailyMinMax(ctx, currency)
 }
 
-func (s *RateService) GetHourlyChange(currency string) (float64, error) {
-	return s.repo.GetHourlyChange(currency)
+func (s *RateService) GetHourlyChange(ctx context.Context, currency string) (float64, error) {
+	return s.repo.GetHourlyChange(ctx, currency)
 }
 
-func (s *RateService) Save(currency string, price float64) error {
-	return s.repo.Save(currency, price)
+func (s *RateService) Save(ctx context.Context, currency string, price float64) error {
+	return s.repo.Save(ctx, currency, price)
 }

@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"context"
 	"cryptobot/internal/service"
 	"strings"
 
@@ -17,6 +18,7 @@ func HandleRates(
 	if len(args) == 1 {
 
 		btc, err := BuildRateMessage(
+			context.Background(),
 			"bitcoin",
 			rateService,
 		)
@@ -26,6 +28,7 @@ func HandleRates(
 		}
 
 		eth, err := BuildRateMessage(
+			context.Background(),
 			"ethereum",
 			rateService,
 		)
@@ -59,6 +62,7 @@ func SendSingleRate(
 ) {
 
 	text, err := BuildRateMessage(
+		context.Background(),
 		currency,
 		rateService,
 	)

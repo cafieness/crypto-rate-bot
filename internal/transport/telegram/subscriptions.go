@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"context"
 	"cryptobot/internal/service"
 	"strconv"
 	"strings"
@@ -58,6 +59,7 @@ func StartAuto(
 	}
 
 	err = subService.Subscribe(
+		context.Background(),
 		update.Message.Chat.ID,
 		minutes,
 		currency,
@@ -87,6 +89,7 @@ func StopAuto(
 ) {
 
 	err := service.Unsubscribe(
+		context.Background(),
 		update.Message.Chat.ID,
 	)
 

@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"database/sql"
-	"fmt"
+	"log/slog"
 )
 
 func Connect(dsn string) (*sql.DB, error) {
@@ -17,7 +17,7 @@ func Connect(dsn string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	fmt.Println("Database connected")
+	slog.Info("database connected")
 
 	return db, nil
 }

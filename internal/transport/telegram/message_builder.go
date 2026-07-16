@@ -1,25 +1,26 @@
 package telegram
 
 import (
+	"context"
 	"cryptobot/internal/service"
 	"fmt"
 	"strings"
 )
 
-func BuildRateMessage(currency string, rateService *service.RateService) (string, error) {
-	rate, err := rateService.GetLatest(currency)
+func BuildRateMessage(ctx context.Context, currency string, rateService *service.RateService) (string, error) {
+	rate, err := rateService.GetLatest(ctx, currency)
 
 	if err != nil {
 		return "", err
 	}
 
-	min, max, err := rateService.GetDailyMinMax(currency)
+	min, max, err := rateService.GetDailyMinMax(ctx, currency)
 
 	if err != nil {
 		return "", err
 	}
 
-	change, err := rateService.GetHourlyChange(currency)
+	change, err := rateService.GetHourlyChange(ctx, currency)
 
 	if err != nil {
 		return "", err

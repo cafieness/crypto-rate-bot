@@ -36,6 +36,7 @@ func (h *Handler) GetRate(
 	}
 
 	rate, err := h.rateService.GetLatest(
+		r.Context(),
 		currency,
 	)
 
@@ -78,7 +79,7 @@ func (h *Handler) GetRates(
 
 	for _, currency := range currencies {
 
-		rate, err := h.rateService.GetLatest(currency)
+		rate, err := h.rateService.GetLatest(r.Context(), currency)
 
 		if err != nil {
 			http.Error(

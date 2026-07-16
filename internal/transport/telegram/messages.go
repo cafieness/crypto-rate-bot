@@ -1,7 +1,7 @@
 package telegram
 
 import (
-	"log"
+	"log/slog"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -20,6 +20,6 @@ func SendText(
 	_, err := bot.Send(msg)
 
 	if err != nil {
-		log.Println(err)
+		slog.Error("Failed to send message")
 	}
 }

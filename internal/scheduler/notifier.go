@@ -1,9 +1,10 @@
 package scheduler
 
 import (
+	"context"
 	"cryptobot/internal/service"
 	"cryptobot/internal/transport/telegram"
-	"log"
+	"log/slog"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -27,7 +28,7 @@ func NewNotifier(
 	}
 }
 
-func (n *Notifier) Start() {
+func (n *Notifier) Start(ctx context.Context) {
 
 	const notifierInterval = time.Minute
 
@@ -35,16 +36,24 @@ func (n *Notifier) Start() {
 
 	defer ticker.Stop()
 
-	for range ticker.C {
-		n.notify()
+	for {
+		select {
+
+		case <-ticker.C:
+			n.notify(ctx)
+
+		case <-ctx.Done():
+			slog.Info("notifier stopped")
+			return
+		}
 	}
 }
 
-func (n *Notifier) notify() {
-	subs, err := n.subService.GetActive()
+func (n *Notifier) notify(ctx context.Context) {
+	subs, err := n.subService.GetActive(ctx)
 
 	if err != nil {
-		log.Println(err)
+		slog.Error("Failed get active", "error", err)
 		return
 	}
 
@@ -69,11 +78,12 @@ func (n *Notifier) send(
 	currency string,
 ) {
 	text, err := telegram.BuildRateMessage(
+		context.Background(),
 		currency,
 		n.rateService,
 	)
 	if err != nil {
-		log.Println(err)
+		slog.Error("Failed build rate message", "error", err)
 		return
 	}
 
@@ -85,17 +95,18 @@ func (n *Notifier) send(
 	_, err = n.bot.Send(msg)
 
 	if err != nil {
-		log.Println(err)
+		slog.Error("Failed to send message", "error", err)
 		return
 	}
 
 	err = n.subService.UpdateLastSent(
+		context.Background(),
 		chatID,
 		currency,
 	)
 
 	if err != nil {
-		log.Println(err)
+		slog.Error("Failed update last sent", "error", err)
 	}
 
 }

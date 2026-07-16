@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"cryptobot/internal/domain"
 	"database/sql"
 	"fmt"
@@ -19,10 +20,12 @@ func NewRateRepository(db *sql.DB) *RateRepository {
 }
 
 func (r *RateRepository) Save(
+	ctx context.Context,
 	currency string,
 	price float64,
 ) error {
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(
+		ctx,
 		`
 		INSERT INTO rates(currency, price)
 		VALUES($1, $2)
@@ -33,9 +36,11 @@ func (r *RateRepository) Save(
 	return err
 }
 
-func (r *RateRepository) GetDailyMinMax(currency string) (float64, float64, error) {
+func (r *RateRepository) GetDailyMinMax(ctx context.Context,
+	currency string) (float64, float64, error) {
 	var min, max float64
-	err := r.db.QueryRow(
+	err := r.db.QueryRowContext(
+		ctx,
 		`
 		SELECT min(price), max(price)
 		from rates
@@ -50,14 +55,15 @@ func (r *RateRepository) GetDailyMinMax(currency string) (float64, float64, erro
 	return min, max, err
 }
 
-func (r *RateRepository) GetHourlyChange(currency string) (float64, error) {
+func (r *RateRepository) GetHourlyChange(ctx context.Context, currency string) (float64, error) {
 	var old float64
 	var current domain.Rate
-	current, err := r.GetLatest(currency)
+	current, err := r.GetLatest(ctx, currency)
 	if err != nil {
 		return 0, fmt.Errorf("no data for latest rate: %w", err)
 	}
-	err = r.db.QueryRow(
+	err = r.db.QueryRowContext(
+		ctx,
 		`
 		SELECT price
 		from rates
@@ -81,9 +87,10 @@ func (r *RateRepository) GetHourlyChange(currency string) (float64, error) {
 	return change, nil
 }
 
-func (r *RateRepository) GetLatest(currency string) (domain.Rate, error) {
+func (r *RateRepository) GetLatest(ctx context.Context, currency string) (domain.Rate, error) {
 	var rate domain.Rate
-	err := r.db.QueryRow(
+	err := r.db.QueryRowContext(
+		ctx,
 		`
 		SELECT currency, price
 		from rates

@@ -3,7 +3,7 @@ package scheduler
 import (
 	"context"
 	"cryptobot/internal/service"
-	"log"
+	"log/slog"
 	"time"
 )
 
@@ -24,14 +24,23 @@ func NewUpdater(service *service.RateService,
 	}
 }
 
-func (u *Updater) Start() {
-	u.update()
-	ticker := time.NewTicker(u.Interval)
+func (u *Updater) Start(ctx context.Context) {
 
+	u.update()
+
+	ticker := time.NewTicker(u.Interval)
 	defer ticker.Stop()
 
-	for range ticker.C {
-		u.update()
+	for {
+		select {
+
+		case <-ticker.C:
+			u.update()
+
+		case <-ctx.Done():
+			slog.Info("updater stopped")
+			return
+		}
 	}
 }
 
@@ -50,33 +59,36 @@ func (u *Updater) update() {
 
 		price, err := u.Fetch(ctx, coin)
 
-		cancel()
+		defer cancel()
 
 		if err != nil {
-			log.Printf(
-				"failed to fetch %s: %v",
-				coin, err,
+			slog.Error(
+				"failed to fetch",
+				"currency", coin,
+				"error", err,
 			)
 			continue
 		}
+
 		err = u.Service.Save(
+			ctx,
 			coin,
 			price,
 		)
+
 		if err != nil {
-
-			log.Printf(
-				"failed save %s: %v",
-				coin,
-				err,
+			slog.Error(
+				"failed to save",
+				"currency", coin,
+				"error", err,
 			)
-
 			continue
 		}
-		log.Printf(
-			"%s updated: %.2f",
-			coin,
-			price,
+
+		slog.Info(
+			"rate updated",
+			"currency", coin,
+			"price", price,
 		)
 	}
 }

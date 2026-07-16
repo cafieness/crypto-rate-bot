@@ -1,10 +1,11 @@
 package telegram
 
 import (
+	"context"
 	"cryptobot/internal/service"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -18,16 +19,23 @@ func NewBot(token string) (*tgbotapi.BotAPI, error) {
 		return nil, fmt.Errorf("failed to create bot: %w", err)
 	}
 
-	log.Printf("Authorized as %s", bot.Self.UserName)
+	slog.Info(
+		"telegram bot authorized",
+		"username",
+		bot.Self.UserName,
+	)
 
 	return bot, nil
 }
 
-func Run(bot *tgbotapi.BotAPI, rateService *service.RateService, subService *service.SubscriptionService) {
+func Run(ctx context.Context, bot *tgbotapi.BotAPI, rateService *service.RateService, subService *service.SubscriptionService) {
 
 	err := SetCommands(bot)
 	if err != nil {
-		log.Println("failed to set commands:", err)
+		slog.Error(
+			"failed to set commands",
+			"error", err,
+		)
 	}
 
 	u := tgbotapi.NewUpdate(0)
@@ -35,17 +43,28 @@ func Run(bot *tgbotapi.BotAPI, rateService *service.RateService, subService *ser
 
 	updates := bot.GetUpdatesChan(u)
 
-	for update := range updates {
-		if update.Message == nil {
-			continue
-		}
-		HandleCommand(
-			update,
-			bot,
-			rateService,
-			subService,
-		)
+	for {
+		select {
 
+		case update, ok := <-updates:
+			if !ok {
+				return
+			}
+			if update.Message == nil {
+				continue
+			}
+
+			HandleCommand(
+				update,
+				bot,
+				rateService,
+				subService,
+			)
+
+		case <-ctx.Done():
+			slog.Info("telegram stopped")
+			return
+		}
 	}
 
 }

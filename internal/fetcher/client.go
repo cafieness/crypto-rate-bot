@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
@@ -49,6 +50,7 @@ func (c *Client) FetchRate(ctx context.Context, coin string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
@@ -59,6 +61,12 @@ func (c *Client) FetchRate(ctx context.Context, coin string) (float64, error) {
 	if resp.StatusCode != http.StatusOK {
 		return 0, fmt.Errorf("coingecko returned status %d: %s", resp.StatusCode, string(body))
 	}
+
+	slog.Info("coingecko response",
+		"status", resp.StatusCode,
+		"body", string(body),
+		"url", requestURL,
+	)
 
 	var parsed CoinGeckoResponse
 	if err := json.Unmarshal(body, &parsed); err != nil {
