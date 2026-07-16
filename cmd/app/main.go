@@ -33,7 +33,11 @@ func main() {
 		return
 	}
 
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			slog.Error("failed to close database", "error", err)
+		}
+	}()
 
 	startBackgroundWorkers(ctx, cfg, rateService, subService, bot)
 

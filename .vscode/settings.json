@@ -1,15 +1,3 @@
 {
-    "sqltools.connections": [
-        {
-            "ssh": "Disabled",
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5439,
-            "askForPassword": true,
-            "driver": "PostgreSQL",
-            "username": "postgres",
-            "database": "crypto",
-            "name": "Crypto-Bot-Local"
-        }
-    ]
+    "sqltools.connections": []
 }

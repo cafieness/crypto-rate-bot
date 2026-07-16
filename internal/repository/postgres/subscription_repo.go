@@ -72,7 +72,11 @@ func (s *SubscriptionRepository) GetActive(ctx context.Context) (
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			return
+		}
+	}()
 
 	var subscriptions []domain.Subscription
 

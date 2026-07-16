@@ -2,17 +2,16 @@ package http
 
 import (
 	"cryptobot/internal/domain"
-	"cryptobot/internal/service"
 	"encoding/json"
 	"net/http"
 	"strings"
 )
 
 type Handler struct {
-	rateService *service.RateService
+	rateService domain.RateService
 }
 
-func NewHandler(rateService *service.RateService) *Handler {
+func NewHandler(rateService domain.RateService) *Handler {
 	return &Handler{
 		rateService: rateService,
 	}
@@ -101,5 +100,11 @@ func (h *Handler) GetRates(
 		"application/json",
 	)
 
-	json.NewEncoder(w).Encode(rates)
+	if err := json.NewEncoder(w).Encode(rates); err != nil {
+		http.Error(
+			w,
+			"failed to encode response",
+			http.StatusInternalServerError,
+		)
+	}
 }

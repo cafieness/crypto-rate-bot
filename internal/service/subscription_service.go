@@ -27,7 +27,7 @@ func (s *SubscriptionService) Subscribe(ctx context.Context, chatID int64, minut
 
 	if exists {
 		return fmt.Errorf(
-			"Already subscribed to %s",
+			"already subscribed to %s",
 			currency,
 		)
 	}

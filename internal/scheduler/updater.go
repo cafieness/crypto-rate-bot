@@ -2,18 +2,18 @@ package scheduler
 
 import (
 	"context"
-	"cryptobot/internal/service"
+	"cryptobot/internal/domain"
 	"log/slog"
 	"time"
 )
 
 type Updater struct {
-	Service  *service.RateService
+	Service  domain.RateWriter
 	Fetch    func(context.Context, string) (float64, error)
 	Interval time.Duration
 }
 
-func NewUpdater(service *service.RateService,
+func NewUpdater(service domain.RateWriter,
 	fetch func(context.Context, string) (float64, error),
 	interval time.Duration,
 ) *Updater {
@@ -26,7 +26,7 @@ func NewUpdater(service *service.RateService,
 
 func (u *Updater) Start(ctx context.Context) {
 
-	u.update()
+	u.Update()
 
 	ticker := time.NewTicker(u.Interval)
 	defer ticker.Stop()
@@ -35,7 +35,7 @@ func (u *Updater) Start(ctx context.Context) {
 		select {
 
 		case <-ticker.C:
-			u.update()
+			u.Update()
 
 		case <-ctx.Done():
 			slog.Info("updater stopped")
@@ -44,7 +44,7 @@ func (u *Updater) Start(ctx context.Context) {
 	}
 }
 
-func (u *Updater) update() {
+func (u *Updater) Update() {
 	coins := []string{
 		"bitcoin",
 		"ethereum",

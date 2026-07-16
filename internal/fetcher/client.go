@@ -51,7 +51,11 @@ func (c *Client) FetchRate(ctx context.Context, coin string) (float64, error) {
 		return 0, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			slog.Error("failed to close response body", "error", err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

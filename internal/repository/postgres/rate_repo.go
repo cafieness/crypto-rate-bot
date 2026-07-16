@@ -4,6 +4,7 @@ import (
 	"context"
 	"cryptobot/internal/domain"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -38,7 +39,7 @@ func (r *RateRepository) Save(
 
 func (r *RateRepository) GetDailyMinMax(ctx context.Context,
 	currency string) (float64, float64, error) {
-	var min, max float64
+	var minPrice, maxPrice sql.NullFloat64
 	err := r.db.QueryRowContext(
 		ctx,
 		`
@@ -49,10 +50,13 @@ func (r *RateRepository) GetDailyMinMax(ctx context.Context,
 		`,
 		currency,
 	).Scan(
-		&min,
-		&max,
+		&minPrice,
+		&maxPrice,
 	)
-	return min, max, err
+	if err != nil {
+		return 0, 0, err
+	}
+	return minPrice.Float64, maxPrice.Float64, nil
 }
 
 func (r *RateRepository) GetHourlyChange(ctx context.Context, currency string) (float64, error) {
@@ -76,6 +80,9 @@ func (r *RateRepository) GetHourlyChange(ctx context.Context, currency string) (
 	).Scan(
 		&old,
 	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil // недостаточно истории — считаем изменение нулевым, это не ошибка
+	}
 	if err != nil {
 		return 0, err
 	}
