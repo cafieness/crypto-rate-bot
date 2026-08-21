@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
+	"cryptobot/internal/coingecko"
 	"cryptobot/internal/config"
-	"cryptobot/internal/fetcher"
+	transporthttp "cryptobot/internal/http"
 	"cryptobot/internal/logger"
-	"cryptobot/internal/repository/postgres"
+	"cryptobot/internal/postgres"
+	"cryptobot/internal/rate"
 	"cryptobot/internal/scheduler"
-	"cryptobot/internal/service"
-	transporthttp "cryptobot/internal/transport/http"
-	"cryptobot/internal/transport/telegram"
+	"cryptobot/internal/subscription"
+	"cryptobot/internal/telegram"
 	"database/sql"
 	"log/slog"
 	"net/http"
@@ -58,8 +59,8 @@ func initLogger() {
 // build application dependencies
 
 func buildApp(cfg *config.Config) (
-	rateService *service.RateService,
-	subService *service.SubscriptionService,
+	rateService *rate.RateService,
+	subService *subscription.SubscriptionService,
 	bot *tgbotapi.BotAPI,
 	db *sql.DB,
 	err error,
@@ -72,10 +73,10 @@ func buildApp(cfg *config.Config) (
 	}
 
 	repo := postgres.NewRateRepository(db)
-	rateService = service.NewRateService(repo)
+	rateService = rate.NewRateService(repo)
 
 	subRepo := postgres.NewSubscriptionRepository(db)
-	subService = service.NewSubscriptionService(
+	subService = subscription.NewSubscriptionService(
 		subRepo,
 	)
 	bot, err = telegram.NewBot(
@@ -95,8 +96,8 @@ func buildApp(cfg *config.Config) (
 func startBackgroundWorkers(
 	ctx context.Context,
 	cfg *config.Config,
-	rateService *service.RateService,
-	subService *service.SubscriptionService,
+	rateService *rate.RateService,
+	subService *subscription.SubscriptionService,
 	bot *tgbotapi.BotAPI,
 ) {
 	notifier := scheduler.NewNotifier(
@@ -113,7 +114,7 @@ func startBackgroundWorkers(
 
 	go notifier.Start(ctx)
 
-	client := fetcher.NewClient(cfg)
+	client := coingecko.NewClient(cfg)
 
 	updater := scheduler.NewUpdater(
 		rateService,
@@ -130,7 +131,7 @@ func startBackgroundWorkers(
 
 // start http server
 
-func newHTTPServer(rateService *service.RateService) *http.Server {
+func newHTTPServer(rateService *rate.RateService) *http.Server {
 	router := transporthttp.NewRouter(rateService)
 
 	server := &http.Server{

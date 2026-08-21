@@ -2,11 +2,11 @@ package mocks
 
 import (
 	"context"
-	"cryptobot/internal/domain"
+	"cryptobot/internal/subscription"
 )
 
 type MockSubscriptionRepository struct {
-	Subscriptions []domain.Subscription
+	Subscriptions []subscription.Subscription
 
 	CreateErr    error
 	ExistsResult bool
@@ -15,7 +15,7 @@ type MockSubscriptionRepository struct {
 
 func (m *MockSubscriptionRepository) Create(
 	ctx context.Context,
-	sub domain.Subscription,
+	sub subscription.Subscription,
 ) error {
 
 	if m.CreateErr != nil {
@@ -55,7 +55,7 @@ func (m *MockSubscriptionRepository) Deactivate(
 
 func (m *MockSubscriptionRepository) GetActive(
 	ctx context.Context,
-) ([]domain.Subscription, error) {
+) ([]subscription.Subscription, error) {
 
 	return m.Subscriptions, nil
 }

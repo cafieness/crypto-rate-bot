@@ -2,8 +2,9 @@ package scheduler
 
 import (
 	"context"
-	"cryptobot/internal/service"
-	"cryptobot/internal/transport/telegram"
+	"cryptobot/internal/rate"
+	"cryptobot/internal/subscription"
+	"cryptobot/internal/telegram"
 	"log/slog"
 	"time"
 
@@ -11,14 +12,14 @@ import (
 )
 
 type Notifier struct {
-	rateService *service.RateService
-	subService  *service.SubscriptionService
+	rateService *rate.RateService
+	subService  *subscription.SubscriptionService
 	bot         *tgbotapi.BotAPI
 }
 
 func NewNotifier(
-	rateService *service.RateService,
-	subService *service.SubscriptionService,
+	rateService *rate.RateService,
+	subService *subscription.SubscriptionService,
 	bot *tgbotapi.BotAPI,
 ) *Notifier {
 	return &Notifier{

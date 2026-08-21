@@ -2,18 +2,18 @@ package mocks
 
 import (
 	"context"
-	"cryptobot/internal/domain"
+	"cryptobot/internal/rate"
 )
 
-type MockRateService struct {
-	RateResult domain.Rate
+type MockService struct {
+	RateResult rate.Rate
 	Err        error
 }
 
-func (m *MockRateService) GetLatest(
+func (m *MockService) GetLatest(
 	ctx context.Context,
 	currency string,
-) (domain.Rate, error) {
+) (rate.Rate, error) {
 
 	return m.RateResult, m.Err
 }

@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"context"
-	"cryptobot/internal/domain"
+	"cryptobot/internal/rate"
 )
 
 type MockRateRepository struct {
@@ -15,7 +15,7 @@ type MockRateRepository struct {
 	GetLatestFunc func(
 		ctx context.Context,
 		currency string,
-	) (domain.Rate, error)
+	) (rate.Rate, error)
 
 	GetDailyMinMaxFunc func(
 		ctx context.Context,
@@ -39,7 +39,7 @@ func (m *MockRateRepository) Save(
 func (m *MockRateRepository) GetLatest(
 	ctx context.Context,
 	currency string,
-) (domain.Rate, error) {
+) (rate.Rate, error) {
 	return m.GetLatestFunc(ctx, currency)
 }
 

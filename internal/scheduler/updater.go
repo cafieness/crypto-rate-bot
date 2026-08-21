@@ -2,18 +2,18 @@ package scheduler
 
 import (
 	"context"
-	"cryptobot/internal/domain"
+	"cryptobot/internal/rate"
 	"log/slog"
 	"time"
 )
 
 type Updater struct {
-	Service  domain.RateWriter
+	Service  rate.RateWriter
 	Fetch    func(context.Context, string) (float64, error)
 	Interval time.Duration
 }
 
-func NewUpdater(service domain.RateWriter,
+func NewUpdater(service rate.RateWriter,
 	fetch func(context.Context, string) (float64, error),
 	interval time.Duration,
 ) *Updater {
