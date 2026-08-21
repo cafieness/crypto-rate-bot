@@ -34,25 +34,15 @@ jobs:
       - name: Tests
         run: go test ./...
 
+      - name: Lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.12.2
+
 
       - name: Build
         run: go build ./...
       
       
-      - name: Deploy
-        if: github.ref == 'refs/heads/main'
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ~/cryptobot
-            git pull
-            docker compose up -d --build
 
 
-      - name: Lint
-        uses: golangci/golangci-lint-action@v7
-        with:
-          version: latest
