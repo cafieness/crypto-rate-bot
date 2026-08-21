@@ -33,7 +33,6 @@ func (c *Client) FetchRate(ctx context.Context, coin string) (float64, error) {
 
 	params.Add("ids", coin)
 	params.Add("vs_currencies", "usd")
-	params.Add("x_cg_demo_api_key", c.key)
 
 	requestURL := c.url + "?" + params.Encode()
 	req, err := http.NewRequestWithContext(
@@ -45,6 +44,8 @@ func (c *Client) FetchRate(ctx context.Context, coin string) (float64, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	req.Header.Set("x-cg-demo-api-key", c.key)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -66,10 +67,10 @@ func (c *Client) FetchRate(ctx context.Context, coin string) (float64, error) {
 		return 0, fmt.Errorf("coingecko returned status %d: %s", resp.StatusCode, string(body))
 	}
 
-	slog.Info("coingecko response",
+	slog.Info(
+		"coingecko rate fetched",
+		"coin", coin,
 		"status", resp.StatusCode,
-		"body", string(body),
-		"url", requestURL,
 	)
 
 	var parsed CoinGeckoResponse

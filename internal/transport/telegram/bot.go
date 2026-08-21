@@ -30,7 +30,12 @@ func NewBot(token string) (*tgbotapi.BotAPI, error) {
 
 func Run(ctx context.Context, bot *tgbotapi.BotAPI, rateService *service.RateService, subService *service.SubscriptionService) {
 
-	err := SetCommands(bot)
+	err := ClearCommands(bot)
+	if err != nil {
+		slog.Error("failed clear commands", "error", err)
+	}
+
+	err = SetCommands(bot)
 	if err != nil {
 		slog.Error(
 			"failed to set commands",

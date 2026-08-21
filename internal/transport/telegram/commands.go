@@ -77,6 +77,14 @@ ethereum
 
 }
 
+func ClearCommands(bot *tgbotapi.BotAPI) error {
+	config := tgbotapi.NewDeleteMyCommands()
+
+	_, err := bot.Request(config)
+
+	return err
+}
+
 func SetCommands(bot *tgbotapi.BotAPI) error {
 
 	commands := []tgbotapi.BotCommand{
