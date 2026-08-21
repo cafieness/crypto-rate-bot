@@ -3,6 +3,7 @@ package http
 import (
 	"cryptobot/internal/domain"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strings"
 )
@@ -61,6 +62,16 @@ func (h *Handler) GetRate(
 			"failed to encode response",
 			http.StatusInternalServerError,
 		)
+	}
+}
+
+func HealthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(map[string]string{
+		"status": "ok",
+	}); err != nil {
+		slog.Error("failed to encode health response", "error", err)
 	}
 }
 

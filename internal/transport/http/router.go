@@ -18,6 +18,10 @@ func NewRouter(rateService *service.RateService) http.Handler {
 		"GET /rates/",
 		handler.GetRate,
 	)
+	mux.HandleFunc(
+		"GET /health",
+		HealthHandler,
+	)
 
 	return mux
 }

@@ -25,6 +25,11 @@ services:
       - .env
     ports:
       - "8081:8081"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   swagger-ui:
     image: swaggerapi/swagger-ui
     container_name: crypto-swagger
