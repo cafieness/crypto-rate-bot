@@ -26,7 +26,7 @@ func TestUpdater_Update(t *testing.T) {
 		time.Minute,
 	)
 
-	updater.Update()
+	updater.Update(context.Background())
 
 	assert.Equal(
 		t,

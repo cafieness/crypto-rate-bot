@@ -26,7 +26,7 @@ func NewUpdater(service rate.RateWriter,
 
 func (u *Updater) Start(ctx context.Context) {
 
-	u.Update()
+	u.Update(ctx)
 
 	ticker := time.NewTicker(u.Interval)
 	defer ticker.Stop()
@@ -35,7 +35,7 @@ func (u *Updater) Start(ctx context.Context) {
 		select {
 
 		case <-ticker.C:
-			u.Update()
+			u.Update(ctx)
 
 		case <-ctx.Done():
 			slog.Info("updater stopped")
@@ -44,7 +44,7 @@ func (u *Updater) Start(ctx context.Context) {
 	}
 }
 
-func (u *Updater) Update() {
+func (u *Updater) Update(parentCtx context.Context) {
 	coins := []string{
 		"bitcoin",
 		"ethereum",
@@ -53,13 +53,13 @@ func (u *Updater) Update() {
 	for _, coin := range coins {
 
 		ctx, cancel := context.WithTimeout(
-			context.Background(),
+			parentCtx,
 			10*time.Second,
 		)
 
 		price, err := u.Fetch(ctx, coin)
 
-		defer cancel()
+		cancel()
 
 		if err != nil {
 			slog.Error(

@@ -61,6 +61,7 @@ func Run(ctx context.Context, bot *tgbotapi.BotAPI, rateService *rate.RateServic
 			}
 
 			HandleCommand(
+				ctx,
 				update,
 				bot,
 				rateService,

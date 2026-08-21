@@ -3,6 +3,7 @@ package telegram
 import (
 	"context"
 	"cryptobot/internal/subscription"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,6 +11,7 @@ import (
 )
 
 func StartAuto(
+	ctx context.Context,
 	update tgbotapi.Update,
 	bot *tgbotapi.BotAPI,
 	subService *subscription.SubscriptionService,
@@ -21,7 +23,7 @@ func StartAuto(
 		SendText(
 			update,
 			bot,
-			"Use: /subscribe [currency] [time]",
+			"Usage: /subscribe <currency> <minutes>",
 		)
 		return
 	}
@@ -34,7 +36,7 @@ func StartAuto(
 		SendText(
 			update,
 			bot,
-			"Available: bitcoin, ethereum",
+			"Unsupported currency. Available: bitcoin, ethereum.",
 		)
 		return
 	}
@@ -53,13 +55,13 @@ func StartAuto(
 		SendText(
 			update,
 			bot,
-			"Time should be more than 0",
+			"Minutes must be greater than 0.",
 		)
 		return
 	}
 
 	err = subService.Subscribe(
-		context.Background(),
+		ctx,
 		update.Message.Chat.ID,
 		minutes,
 		currency,
@@ -69,7 +71,7 @@ func StartAuto(
 		SendText(
 			update,
 			bot,
-			err.Error(),
+			"Failed to create subscription.",
 		)
 		return
 	}
@@ -77,19 +79,24 @@ func StartAuto(
 	SendText(
 		update,
 		bot,
-		"Subscription is enabled!",
+		fmt.Sprintf(
+			"Subscription enabled: %s every %d minutes.",
+			currency,
+			minutes,
+		),
 	)
 
 }
 
 func StopAuto(
+	ctx context.Context,
 	update tgbotapi.Update,
 	bot *tgbotapi.BotAPI,
 	service *subscription.SubscriptionService,
 ) {
 
 	err := service.Unsubscribe(
-		context.Background(),
+		ctx,
 		update.Message.Chat.ID,
 	)
 
@@ -101,7 +108,7 @@ func StopAuto(
 	SendText(
 		update,
 		bot,
-		"Subscription is disabled",
+		"Subscription disabled",
 	)
 
 }

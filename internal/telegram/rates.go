@@ -9,6 +9,7 @@ import (
 )
 
 func HandleRates(
+	ctx context.Context,
 	update tgbotapi.Update,
 	bot *tgbotapi.BotAPI,
 	rateService *rate.RateService,
@@ -18,22 +19,22 @@ func HandleRates(
 	if len(args) == 1 {
 
 		btc, err := BuildRateMessage(
-			context.Background(),
+			ctx,
 			"bitcoin",
 			rateService,
 		)
 		if err != nil {
-			SendText(update, bot, "Нет данных")
+			SendText(update, bot, "Rate data is currently unavailable.")
 			return
 		}
 
 		eth, err := BuildRateMessage(
-			context.Background(),
+			ctx,
 			"ethereum",
 			rateService,
 		)
 		if err != nil {
-			SendText(update, bot, "Нет данных")
+			SendText(update, bot, "Rate data is currently unavailable.")
 			return
 		}
 
@@ -47,6 +48,7 @@ func HandleRates(
 	}
 
 	SendSingleRate(
+		ctx,
 		args[1],
 		rateService,
 		update,
@@ -55,6 +57,7 @@ func HandleRates(
 }
 
 func SendSingleRate(
+	ctx context.Context,
 	currency string,
 	rateService *rate.RateService,
 	update tgbotapi.Update,
@@ -62,7 +65,7 @@ func SendSingleRate(
 ) {
 
 	text, err := BuildRateMessage(
-		context.Background(),
+		ctx,
 		currency,
 		rateService,
 	)

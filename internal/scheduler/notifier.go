@@ -54,7 +54,7 @@ func (n *Notifier) notify(ctx context.Context) {
 	subs, err := n.subService.GetActive(ctx)
 
 	if err != nil {
-		slog.Error("Failed get active", "error", err)
+		slog.Error("failed get active sub", "error", err)
 		return
 	}
 
@@ -68,6 +68,7 @@ func (n *Notifier) notify(ctx context.Context) {
 		}
 
 		n.send(
+			ctx,
 			sub.ChatID,
 			sub.Currency,
 		)
@@ -75,11 +76,12 @@ func (n *Notifier) notify(ctx context.Context) {
 }
 
 func (n *Notifier) send(
+	ctx context.Context,
 	chatID int64,
 	currency string,
 ) {
 	text, err := telegram.BuildRateMessage(
-		context.Background(),
+		ctx,
 		currency,
 		n.rateService,
 	)
@@ -101,7 +103,7 @@ func (n *Notifier) send(
 	}
 
 	err = n.subService.UpdateLastSent(
-		context.Background(),
+		ctx,
 		chatID,
 		currency,
 	)

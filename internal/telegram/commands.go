@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"context"
 	"cryptobot/internal/rate"
 	"cryptobot/internal/subscription"
 
@@ -8,6 +9,7 @@ import (
 )
 
 func HandleCommand(
+	ctx context.Context,
 	update tgbotapi.Update,
 	bot *tgbotapi.BotAPI,
 	rateService *rate.RateService,
@@ -22,33 +24,31 @@ func HandleCommand(
 		SendText(
 			update,
 			bot,
-			"Hi! Use /rates to see crypto currencies rate or use /help",
+			"Hi! Use /rates to view current crypto rates, or /help to see all commands.",
 		)
 	case "help":
 		SendText(
 			update,
 			bot,
 			`
+Available commands:
+
 /rates - show all crypto rates
+/rates bitcoin - show Bitcoin rate
+/rates ethereum - show Ethereum rate
 
-/rates bitcoin - show bitcoin rate
+/subscribe <currency> <minutes>
+Example: /subscribe bitcoin 60
 
-/rates ethereum - show ethereum rate
+/unsubscribe - stop notifications
 
-/subscribe [currency] [minutes]
-
-Example:
-/subscribe bitcoin 60
-
-/unsubscribe: stop subscription
-
-Available currencies:
-bitcoin
-ethereum
+Supported currencies:
+bitcoin, ethereum
 			`,
 		)
 	case "rates":
 		HandleRates(
+			ctx,
 			update,
 			bot,
 			rateService,
@@ -56,6 +56,7 @@ ethereum
 
 	case "subscribe":
 		StartAuto(
+			ctx,
 			update,
 			bot,
 			subService,
@@ -63,6 +64,7 @@ ethereum
 
 	case "unsubscribe":
 		StopAuto(
+			ctx,
 			update,
 			bot,
 			subService,
@@ -72,7 +74,7 @@ ethereum
 		SendText(
 			update,
 			bot,
-			"Unknown command. Please use /help",
+			"Unknown command. Use /help to see available commands.",
 		)
 	}
 
@@ -103,7 +105,7 @@ func SetCommands(bot *tgbotapi.BotAPI) error {
 		},
 		{
 			Command:     "subscribe",
-			Description: "subscribe and get notify you with current rates and stats",
+			Description: "subscribe to get rate updates",
 		},
 		{
 			Command:     "unsubscribe",
